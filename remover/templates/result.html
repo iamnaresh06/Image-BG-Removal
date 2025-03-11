@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processed Image</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <h2>Background Removed Successfully!</h2>
+
+    {% if output_image %}
+        <img src="{{ output_image }}" alt="Processed Image" width="300">
+        <br>
+        <a href="{{ output_image }}" download>
+            <button>Download Processed Image</button>
+        </a>
+    {% else %}
+        <p>Something went wrong. Image not found.</p>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'index_page' %}"><button>Upload Another Image</button></a>
+</body>
+</html>
