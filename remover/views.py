@@ -1,10 +1,13 @@
 from django.conf import settings
 import os
-from rembg import remove, new_session
 from django.shortcuts import render
 from django.http import HttpResponse, FileResponse
 from PIL import Image
 import io
+
+def remove_background(image):
+    from rembg import remove
+    return remove(image)
 
 def index(request):
     return render(request, 'index.html')
@@ -47,7 +50,7 @@ def remove_background(request):
                     alpha_matting_erode_size=10
                 )
             else:
-                output_image = remove(input_image)
+                output_image = remove_background(image)
 
         with open(output_path, 'wb') as out_file:
             out_file.write(output_image)
