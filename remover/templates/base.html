@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Background Remover{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="background-animation">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="glass-container {% block container_class %}{% endblock %}">
+        <header>
+            <div class="logo">
+                <i class="fas fa-magic"></i> BG<span>Remover</span>
+            </div>
+            {% block header_actions %}{% endblock %}
+        </header>
+
+        <main class="{% block main_class %}{% endblock %}">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p>&copy; 2024 AI BG Remover. Crafted with <i class="fas fa-heart"></i> by Naresh Reddy</p>
+                <div class="social-links">
+                    <a href="https://www.linkedin.com/in/iamnaresh06/" target="_blank" title="LinkedIn"><i
+                            class="fab fa-linkedin"></i></a>
+                    <a href="https://reddynaresh.netlify.app/" target="_blank" title="Portfolio"><i
+                            class="fas fa-user-circle"></i></a>
+                    <a href="https://github.com/iamnaresh06/" target="_blank" title="GitHub"><i
+                            class="fab fa-github"></i></a>
+                    <a href="https://leetcode.com/u/iamnaresh_06/" target="_blank" title="LeetCode"><i
+                            class="fas fa-code"></i></a>
+                    <a href="mailto:06.nareshreddy@gmail.com" title="Email"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

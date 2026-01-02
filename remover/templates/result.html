@@ -1,25 +1,137 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Processed Image</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <h2>Background Removed Successfully!</h2>
+{% extends 'base.html' %}
+{% load static %}
 
-    {% if output_image %}
-        <img src="{{ output_image }}" alt="Processed Image" width="300">
-        <br>
-        <a href="{{ output_image }}" download>
-            <button>Download Processed Image</button>
+{% block title %}Processed Image - AI Background Remover{% endblock %}
+
+{% block container_class %}result-container{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'index_page' %}" class="back-link"><i class="fas fa-arrow-left"></i> Back</a>
+{% endblock %}
+
+{% block main_class %}result-main{% endblock %}
+
+{% block content %}
+{% if output_image %}
+<div class="result-content">
+    <div class="result-header">
+        <h2><i class="fas fa-check-circle"></i> Result Ready</h2>
+        <div class="download-controls">
+            <!-- Format Selection -->
+            <div class="control-group">
+                <label>Format:</label>
+                <select id="formatSelect" class="custom-select">
+                    <option value="png">PNG (Transparent)</option>
+                    <option value="jpg">JPG (White BG)</option>
+                    <option value="webp">WEBP (Optimized)</option>
+                </select>
+            </div>
+
+            <!-- Background Selection -->
+            <div class="control-group">
+                <label>Background:</label>
+                <div class="color-options">
+                    <div class="color-option transparent selected" data-color="transparent" title="Transparent"></div>
+                    <div class="color-option white" data-color="#ffffff" title="White"></div>
+                    <div class="color-option black" data-color="#000000" title="Black"></div>
+                    <input type="color" id="customColor" class="color-input" title="Custom Color">
+                </div>
+            </div>
+
+            <button id="downloadBtn" class="cta-button">
+                Download <i class="fas fa-download"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Side by Side Comparison -->
+    <div class="comparison-container">
+        <div class="image-box original-box">
+            <span class="badge">Original</span>
+            <img src="{{ original_image }}" alt="Original Image">
+        </div>
+
+        <div class="image-box processed-box">
+            <span class="badge">Processed</span>
+            <div class="image-bg-wrapper" id="previewContainer">
+                <div class="transparent-grid"></div>
+                <img src="{{ output_image }}" alt="Processed Image" id="processedImg">
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <a href="{% url 'index_page' %}" class="secondary-button">
+            <i class="fas fa-redo"></i> Process Another Image
         </a>
-    {% else %}
-        <p>Something went wrong. Image not found.</p>
-    {% endif %}
+    </div>
+</div>
 
-    <br>
-    <a href="{% url 'index_page' %}"><button>Upload Another Image</button></a>
-</body>
-</html>
+<script>
+    // Elements
+    const formatSelect = document.getElementById('formatSelect');
+    const colorOptions = document.querySelectorAll('.color-option');
+    const customColorInput = document.getElementById('customColor');
+    const previewContainer = document.getElementById('previewContainer');
+    const downloadBtn = document.getElementById('downloadBtn');
+
+    let selectedFormat = 'png';
+    let selectedColor = 'transparent';
+    const filename = "{{ filename }}";
+
+    // Format Change Handler
+    formatSelect.addEventListener('change', (e) => {
+        selectedFormat = e.target.value;
+        if (selectedFormat === 'jpg' && selectedColor === 'transparent') {
+            // Auto-switch to white for JPG if transparent provided
+            setActiveColor('#ffffff');
+        }
+    });
+
+    // Color Selection Handler
+    colorOptions.forEach(opt => {
+        opt.addEventListener('click', () => {
+            setActiveColor(opt.dataset.color, opt);
+        });
+    });
+
+    customColorInput.addEventListener('input', (e) => {
+        setActiveColor(e.target.value);
+    });
+
+    function setActiveColor(color, activeElement = null) {
+        selectedColor = color;
+
+        // Update UI state
+        document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
+        if (activeElement) {
+            activeElement.classList.add('selected');
+        } else if (!['transparent', '#ffffff', '#000000'].includes(color)) {
+            // Custom color logic if needed
+        }
+
+        // Update Preview
+        if (color === 'transparent') {
+            previewContainer.style.background = 'transparent';
+        } else {
+            previewContainer.style.background = color;
+        }
+    }
+
+    // Download Handler
+    downloadBtn.addEventListener('click', () => {
+        // Construct download URL
+        const url = `{% url 'download_file' %}?filename=${filename}&format=${selectedFormat}&color=${encodeURIComponent(selectedColor)}`;
+        window.location.href = url;
+    });
+</script>
+
+{% else %}
+<div class="error-content">
+    <i class="fas fa-exclamation-triangle"></i>
+    <h2>Oops! Something went wrong.</h2>
+    <p>We couldn't process your image. Please try again.</p>
+    <a href="{% url 'index_page' %}" class="cta-button">Try Again</a>
+</div>
+{% endif %}
+{% endblock %}

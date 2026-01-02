@@ -1,17 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Image</title>
-    <link rel="stylesheet" href="/static/styles.css">
-</head>
-<body>
-    <h1>Upload an Image to Remove Background</h1>
-    <form action="{% url 'remove_background' %}" method="post" enctype="multipart/form-data">
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-wrapper">
+    <h1>Remove Image <br>Backgrounds within Seconds</h1>
+    <p class="subtitle">Upload your image and let our AI do the magic instantly. 100% Automatic and Free.</p>
+
+    <form action="{% url 'remove_background' %}" method="post" enctype="multipart/form-data" class="upload-form">
         {% csrf_token %}
-        <input type="file" name="image" required>
-        <button type="submit">Remove Background</button>
+        <div class="file-upload-wrapper">
+            <input type="file" name="image" id="file-input" class="file-input" required accept="image/*">
+            <label for="file-input" class="file-label">
+                <div class="icon-container">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <span class="upload-text">Choose a file or drag & drop it here</span>
+            </label>
+        </div>
+
+        <div class="options-wrapper">
+            <label class="checkbox-container">
+                <input type="checkbox" name="refine_edges" id="refine_edges">
+                <span class="checkmark"></span>
+                <span class="label-text">
+                    <i class="fas fa-magic"></i> Refine Edges (High Quality)
+                </span>
+            </label>
+        </div>
+
+        <button type="submit" class="cta-button">
+            Remove Background <i class="fas fa-wand-magic-sparkles"></i>
+        </button>
+        <!-- Loading Spinner -->
+        <div class="loader" id="loader" style="display: none;">
+            <div class="spinner"></div> Processing...
+        </div>
     </form>
-</body>
-</html>
+</div>
+
+<div class="visual-preview">
+    <div class="hero-decoration">
+        <i class="fas fa-layer-group"></i>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const form = document.querySelector('.upload-form');
+    const loader = document.getElementById('loader');
+    const submitBtn = document.querySelector('.cta-button');
+    const fileInput = document.getElementById('file-input');
+    const fileLabelSpan = document.querySelector('.upload-text');
+
+    if (form) {
+        form.addEventListener('submit', function () {
+            loader.style.display = 'flex';
+            submitBtn.style.display = 'none';
+        });
+    }
+
+    if (fileInput) {
+        fileInput.addEventListener('change', function (e) {
+            if (e.target.files.length > 0) {
+                fileLabelSpan.textContent = e.target.files[0].name;
+                fileLabelSpan.classList.add('file-selected');
+            }
+        });
+    }
+</script>
+{% endblock %}
