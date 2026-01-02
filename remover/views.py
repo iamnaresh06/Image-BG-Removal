@@ -6,10 +6,13 @@ from django.core.files.storage import FileSystemStorage
 from django.core.files.base import ContentFile
 from PIL import Image
 import io
-from rembg import remove
+from rembg import remove, new_session
+
+# Pre-initialize session with explicit model to speed up requests
+REMBG_SESSION = new_session("u2net")
 
 def perform_bg_removal(image_data):
-    return remove(image_data)
+    return remove(image_data, session=REMBG_SESSION)
 
 def index(request):
     return render(request, 'index.html')
@@ -37,6 +40,7 @@ def remove_background(request):
             if refine_edges:
                 output_image_data = remove(
                     input_image_data, 
+                    session=REMBG_SESSION,
                     alpha_matting=True,
                     alpha_matting_foreground_threshold=240,
                     alpha_matting_background_threshold=10,
