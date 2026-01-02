@@ -20,13 +20,18 @@
     font-family: 'Outfit', sans-serif;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    padding: 2rem 0;
     overflow-x: hidden;
     position: relative;
 }
@@ -109,7 +114,6 @@ body {
     flex-direction: column;
     padding: 2rem;
     position: relative;
-    overflow: hidden;
 }
 
 header {
@@ -736,6 +740,4 @@ footer i.fa-heart {
     .cta-button {
         width: 100%;
     }
-}
-
 }

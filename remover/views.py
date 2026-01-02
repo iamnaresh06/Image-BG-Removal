@@ -2,12 +2,14 @@ from django.conf import settings
 import os
 from django.shortcuts import render
 from django.http import HttpResponse, FileResponse
+from django.core.files.storage import FileSystemStorage
+from django.core.files.base import ContentFile
 from PIL import Image
 import io
+from rembg import remove
 
-def remove_background(image):
-    from rembg import remove
-    return remove(image)
+def perform_bg_removal(image_data):
+    return remove(image_data)
 
 def index(request):
     return render(request, 'index.html')
@@ -18,51 +20,44 @@ def remove_background(request):
         image_file = request.FILES['image']
         refine_edges = request.POST.get('refine_edges') == 'on'
 
-        # Define paths
-        upload_folder = settings.MEDIA_ROOT / 'uploaded_images'
-        processed_folder = settings.MEDIA_ROOT / 'processed_images'
-
-        # Ensure directories exist
-        os.makedirs(upload_folder, exist_ok=True)
-        os.makedirs(processed_folder, exist_ok=True)
-
-        input_path = upload_folder / image_file.name
-        output_filename = f"processed_{image_file.name.split('.')[0]}.png"
-        output_path = processed_folder / output_filename
-
-        # Save uploaded file
-        with open(input_path, 'wb+') as destination:
-            for chunk in image_file.chunks():
-                destination.write(chunk)
-
+        fs = FileSystemStorage()
+        
+        # Save uploaded file using Django's storage to handle naming/conflicts
+        input_name = fs.save(f'uploaded_images/{image_file.name}', image_file)
+        input_path = fs.path(input_name)
+        
+        # Determine output filename
+        base_name = os.path.splitext(os.path.basename(input_name))[0]
+        output_name = f"processed_images/processed_{base_name}.png"
+        
         # Process image
         with open(input_path, 'rb') as inp_file:
-            input_image = inp_file.read()
+            input_image_data = inp_file.read()
             
-            # Use basic or advanced removal based on user choice
             if refine_edges:
-                # Alpha matting for finer edge details (hair, etc)
-                output_image = remove(
-                    input_image, 
+                output_image_data = remove(
+                    input_image_data, 
                     alpha_matting=True,
                     alpha_matting_foreground_threshold=240,
                     alpha_matting_background_threshold=10,
                     alpha_matting_erode_size=10
                 )
             else:
-                output_image = remove_background(image)
+                output_image_data = perform_bg_removal(input_image_data)
 
-        with open(output_path, 'wb') as out_file:
-            out_file.write(output_image)
+        # Save processed file
+        if fs.exists(output_name):
+            fs.delete(output_name)
+        processed_name = fs.save(output_name, ContentFile(output_image_data))
 
-        # URLs
-        original_url = settings.MEDIA_URL + f"uploaded_images/{image_file.name}"
-        output_url = settings.MEDIA_URL + f"processed_images/{output_filename}"
+        # Generate URLs and ensure forward slashes for the browser
+        original_url = fs.url(input_name).replace('\\', '/')
+        output_url = fs.url(processed_name).replace('\\', '/')
 
         context = {
             'output_image': output_url,
             'original_image': original_url,
-            'filename': output_filename
+            'filename': os.path.basename(processed_name)
         }
         return render(request, 'result.html', context)
 
