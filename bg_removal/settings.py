@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY")
-DEBUG = True
+DEBUG = False
 
 
 # ✅ Corrected BASE_DIR using Path object
